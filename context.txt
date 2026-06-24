@@ -28,10 +28,11 @@ The codebase is structured logically under the `src/` directory:
 src/
 ├── assets/          - Static assets (images, logos, etc.)
 ├── components/      - Reusable UI elements
-│   └── Navbar.jsx   - Sticky glassmorphic navigation bar with tab switching
+│   └── Navbar.jsx   - Sticky glassmorphic navigation bar with tab switching and role indicator
 ├── services/        - API helper services
 │   └── api.js       - Service layer for backend REST API calls
 ├── views/           - Full page/tab views
+│   ├── Login.jsx    - Interactive role selection landing page
 │   └── ResourceCatalog.jsx - Fully featured asset catalog display
 ├── App.css          - Global application CSS overrides
 ├── App.jsx          - Root component housing theme config, main layout, and navigation
@@ -63,7 +64,9 @@ B. Asset Catalog (views/ResourceCatalog.jsx)
 
 C. Equipment Booking (views/EquipmentBooking.jsx) (Active)
 - Real-time Equipment Booking: Form interface accessible on Tab 1 ("Book Equipment").
-- Form Fields: `resourceId` (number input), `requesterName` (text input), `userRole` (dropdown selector for LECTURER/STUDENT), `requestedQuantity` (number input), `startTime` (datetime-local), and `endTime` (datetime-local).
+- Form Fields: `resourceId` (selected via Autocomplete search suggestions showing name, category, and live available quantity), `requesterName` (text input), `requestedQuantity` (number input), `startTime` (datetime-local), and `endTime` (datetime-local). User role selection dropdown has been removed.
+- Role Integration: Automatically injects the active user role (Lecturer/Student) from the login session into the booking payload.
+- Role Badge: Displays a subtle colored gradient badge (e.g. violet for Lecturer, indigo for Student) highlighting the active booking profile at the top of the form.
 - Feedback Handling:
   - Submit Button: Prominent button with a gradient of purple-indigo and a loading spinner while API booking is in flight.
   - Successful booking (200 OK) displays a green Snackbar Alert: "Success: Equipment Allocated." and clears the form.
@@ -75,6 +78,12 @@ D. Shell Modules / Placeholders (App.jsx)
   - Tab 1: Book Equipment (Active)
   - Tab 2: Location Batch Allocator (Placeholder: "Module Loading...")
   - Tab 3: Master Calendar (Placeholder: "Module Loading...")
+
+E. Role-Selection Landing Page (views/Login.jsx) (Active)
+- High-fidelity simulated login interface presented to unauthenticated users.
+- Prompts users to select their role: "Lecturer" or "Student" using premium hover-animated card buttons featuring styled SVG icons.
+- Selected role persists in `localStorage` to retain the session across reloads.
+- Includes a prominent "Switch Role" button in the navigation bar to sign out/change roles instantly.
 
 ------------------------------------------------------------------------
 4. BACKEND INTEGRATION

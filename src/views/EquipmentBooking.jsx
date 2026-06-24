@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -6,27 +6,27 @@ import {
   CardContent,
   Typography,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button,
   CircularProgress,
   Alert,
   Snackbar,
-  Stack
+  Stack,
+  Chip,
+  Autocomplete
 } from '@mui/material';
-import { bookEquipment } from '../services/api';
+import { bookEquipment, fetchResources } from '../services/api';
 
 /**
  * EquipmentBooking component.
  * Renders a request form for real-time equipment checkout with error/success feedback.
+ * 
+ * @param {Object} props
+ * @param {string} props.userRole - The active user role passed from root
  */
-export default function EquipmentBooking() {
+export default function EquipmentBooking({ userRole }) {
   const [formData, setFormData] = useState({
     resourceId: '',
     requesterName: '',
-    userRole: '',
     requestedQuantity: '',
     startTime: '',
     endTime: ''
@@ -35,6 +35,26 @@ export default function EquipmentBooking() {
   const [loading, setLoading] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [conflictError, setConflictError] = useState(null);
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
+
+  const [startTimeFocused, setStartTimeFocused] = useState(false);
+  const [endTimeFocused, setEndTimeFocused] = useState(false);
+
+  // Fetch equipment list on mount
+  useEffect(() => {
+    const loadEquipment = async () => {
+      try {
+        const data = await fetchResources('EQUIPMENT');
+        setEquipmentOptions(data || []);
+      } catch (err) {
+        console.error('Error fetching equipment options:', err);
+        setFetchError('Could not retrieve equipment catalog suggestions from server.');
+      }
+    };
+    loadEquipment();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,11 +69,11 @@ export default function EquipmentBooking() {
     setLoading(true);
     setConflictError(null);
 
-    // Prepare payload
+    // Prepare payload using the userRole prop
     const payload = {
       resourceId: Number(formData.resourceId),
       requesterName: formData.requesterName,
-      userRole: formData.userRole,
+      userRole: userRole,
       requestedQuantity: Number(formData.requestedQuantity),
       startTime: formData.startTime,
       endTime: formData.endTime
@@ -68,10 +88,10 @@ export default function EquipmentBooking() {
       } else if (result && result.status === 'ALLOCATED') {
         // Backend successfully allocated
         setSuccessOpen(true);
+        setSelectedEquipment(null);
         setFormData({
           resourceId: '',
           requesterName: '',
-          userRole: '',
           requestedQuantity: '',
           startTime: '',
           endTime: ''
@@ -104,21 +124,6 @@ export default function EquipmentBooking() {
       fontFamily: "'Inter', sans-serif",
     },
     '& .MuiOutlinedInput-input': {
-      fontFamily: "'Inter', sans-serif",
-    }
-  };
-
-  const selectStyles = {
-    borderRadius: '12px',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    },
-    '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 0.01)',
-    },
-    '& .MuiSelect-select': {
       fontFamily: "'Inter', sans-serif",
     }
   };
@@ -157,18 +162,111 @@ export default function EquipmentBooking() {
             </Typography>
           </Box>
 
+          {fetchError && (
+            <Alert severity="error" sx={{ mb: 3, borderRadius: '12px', fontFamily: "'Inter', sans-serif" }}>
+              {fetchError}
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
-              <TextField
-                label="Equipment ID (Resource ID)"
-                type="number"
-                name="resourceId"
-                value={formData.resourceId}
-                onChange={handleChange}
-                fullWidth
-                required
-                InputProps={{ inputProps: { min: 1 } }}
-                sx={inputStyles}
+              <Autocomplete
+                options={equipmentOptions}
+                getOptionLabel={(option) => `${option.name} (ID: ${option.id})`}
+                value={selectedEquipment}
+                onChange={(event, newValue) => {
+                  setSelectedEquipment(newValue);
+                  setFormData((prev) => ({
+                    ...prev,
+                    resourceId: newValue ? String(newValue.id) : ''
+                  }));
+                }}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box 
+                      key={option.id} 
+                      component="li" 
+                      {...optionProps}
+                      sx={{
+                        display: 'flex !important',
+                        flexDirection: 'row !important',
+                        justifyContent: 'space-between !important',
+                        alignItems: 'center !important',
+                        width: '100% !important',
+                        py: '10px !important',
+                        px: '16px !important',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.06) !important',
+                        }
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontFamily: "'Outfit', sans-serif", 
+                            fontWeight: 600, 
+                            color: '#f8fafc' 
+                          }}
+                        >
+                          {option.name}
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: 'text.secondary', 
+                            fontSize: '0.75rem' 
+                          }}
+                        >
+                          Category: {option.category} • ID: {option.id}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ flexGrow: 1 }} />
+                      <Chip
+                        label={`${option.quantity} available`}
+                        size="small"
+                        sx={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 700,
+                          fontSize: '0.72rem',
+                          backgroundColor: 'rgba(168, 85, 247, 0.15)',
+                          color: '#c084fc',
+                          border: '1px solid rgba(168, 85, 247, 0.3)',
+                          borderRadius: '8px',
+                          ml: 2
+                        }}
+                      />
+                    </Box>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search Equipment..."
+                    required
+                    placeholder="Type to search equipment (e.g., Projector)..."
+                    sx={inputStyles}
+                  />
+                )}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      borderRadius: '16px',
+                      backgroundColor: '#111b36',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      backgroundImage: 'none',
+                      mt: 1,
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                      '& .MuiAutocomplete-listbox': {
+                        padding: 0,
+                        maxHeight: '300px'
+                      }
+                    }
+                  }
+                }}
               />
 
               <TextField
@@ -181,30 +279,6 @@ export default function EquipmentBooking() {
                 required
                 sx={inputStyles}
               />
-
-              <FormControl fullWidth required sx={{ '& .MuiInputLabel-root': { fontFamily: "'Inter', sans-serif" } }}>
-                <InputLabel id="user-role-label">User Role</InputLabel>
-                <Select
-                  labelId="user-role-label"
-                  name="userRole"
-                  value={formData.userRole}
-                  onChange={handleChange}
-                  label="User Role"
-                  sx={selectStyles}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        borderRadius: '12px',
-                        backgroundColor: '#111b36',
-                        border: '1px solid rgba(255, 255, 255, 0.08)'
-                      }
-                    }
-                  }}
-                >
-                  <MenuItem value="LECTURER" sx={{ fontFamily: "'Inter', sans-serif" }}>Lecturer</MenuItem>
-                  <MenuItem value="STUDENT" sx={{ fontFamily: "'Inter', sans-serif" }}>Student</MenuItem>
-                </Select>
-              </FormControl>
 
               <TextField
                 label="Requested Quantity"
@@ -220,25 +294,29 @@ export default function EquipmentBooking() {
 
               <TextField
                 label="Start Time"
-                type="datetime-local"
+                type={startTimeFocused || formData.startTime ? "datetime-local" : "text"}
                 name="startTime"
                 value={formData.startTime}
                 onChange={handleChange}
+                onFocus={() => setStartTimeFocused(true)}
+                onBlur={() => setStartTimeFocused(false)}
                 fullWidth
                 required
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: startTimeFocused || !!formData.startTime }}
                 sx={inputStyles}
               />
 
               <TextField
                 label="End Time"
-                type="datetime-local"
+                type={endTimeFocused || formData.endTime ? "datetime-local" : "text"}
                 name="endTime"
                 value={formData.endTime}
                 onChange={handleChange}
+                onFocus={() => setEndTimeFocused(true)}
+                onBlur={() => setEndTimeFocused(false)}
                 fullWidth
                 required
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: endTimeFocused || !!formData.endTime }}
                 sx={inputStyles}
               />
 

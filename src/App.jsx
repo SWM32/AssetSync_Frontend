@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography } f
 import Navbar from './components/Navbar';
 import ResourceCatalog from './views/ResourceCatalog';
 import EquipmentBooking from './views/EquipmentBooking';
+import Login from './views/Login';
 
 // Create a premium custom MUI dark theme
 const theme = createTheme({
@@ -55,6 +56,19 @@ const theme = createTheme({
 
 function App() {
   const [activeTab, setActiveTab] = useState(0);
+  const [userRole, setUserRole] = useState(() => {
+    return localStorage.getItem('demoUserRole') || null;
+  });
+
+  const handleSelectRole = (role) => {
+    setUserRole(role);
+    localStorage.setItem('demoUserRole', role);
+  };
+
+  const handleLogout = () => {
+    setUserRole(null);
+    localStorage.removeItem('demoUserRole');
+  };
 
   // Helper to render active views
   const renderViewContent = () => {
@@ -62,7 +76,7 @@ function App() {
       case 0:
         return <ResourceCatalog />;
       case 1:
-        return <EquipmentBooking />;
+        return <EquipmentBooking userRole={userRole} />;
       case 2:
         return (
           <Box 
@@ -132,11 +146,27 @@ function App() {
     }
   };
 
+  if (!userRole) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <Login onSelectRole={handleSelectRole} />
+        </Box>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+        <Navbar 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          userRole={userRole} 
+          onLogout={handleLogout} 
+        />
         <Container 
           maxWidth="lg" 
           component="main"
