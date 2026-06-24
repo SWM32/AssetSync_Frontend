@@ -1,0 +1,93 @@
+========================================================================
+ASSETSYNC - FRONTEND PROJECT CONTEXT
+========================================================================
+
+Welcome to the AssetSync frontend project! This document provides an overview
+of the project's purpose, technology stack, current structure, implemented
+features, and development guidelines for the team.
+
+------------------------------------------------------------------------
+1. PROJECT OVERVIEW & TECH STACK
+------------------------------------------------------------------------
+AssetSync is a high-fidelity, responsive frontend web application designed
+to manage university resources (physical equipment and locations/rooms).
+
+Core Technologies:
+- Framework: React 19 (JavaScript ES module structure)
+- Build Tool: Vite
+- UI Library: Material UI (MUI v9)
+- Styling: Custom MUI CSS-in-JS + Theme Provider (Premium Dark Mode)
+- HTTP Client: Axios for API integrations
+- Development Tools: ESLint, Prettier
+
+------------------------------------------------------------------------
+2. DIRECTORY STRUCTURE
+------------------------------------------------------------------------
+The codebase is structured logically under the `src/` directory:
+
+src/
+├── assets/          - Static assets (images, logos, etc.)
+├── components/      - Reusable UI elements
+│   └── Navbar.jsx   - Sticky glassmorphic navigation bar with tab switching
+├── services/        - API helper services
+│   └── api.js       - Service layer for backend REST API calls
+├── views/           - Full page/tab views
+│   └── ResourceCatalog.jsx - Fully featured asset catalog display
+├── App.css          - Global application CSS overrides
+├── App.jsx          - Root component housing theme config, main layout, and navigation
+├── index.css        - Global baseline CSS
+└── main.jsx         - React application entrypoint
+
+------------------------------------------------------------------------
+3. CURRENTLY IMPLEMENTED FEATURES
+------------------------------------------------------------------------
+
+A. Custom Dark Theme & Premium Aesthetics (App.jsx)
+- Custom Material-UI theme featuring a rich, deep blue-slate dark mode.
+- Subtle background gradients, glassmorphism panel styles, and responsive layout.
+- Modern custom typography leveraging 'Inter' and 'Outfit' Google Fonts.
+
+B. Asset Catalog (views/ResourceCatalog.jsx)
+- Integrated Data Fetching: Calls `fetchResources()` API helper to load assets
+  from the backend, including loading indicators and robust error-handling.
+- Dynamic Tab Filtering: Toggle bar allowing users to filter by "All Assets",
+  "Locations", or "Equipment".
+- Client-Side Live Search: Real-time filtering by asset name or category.
+- Highly Interactive Grid:
+  - Locations display capacity information (e.g., student capacity).
+  - Equipment displays quantities and condition/quality indicators.
+  - Quality conditions (Good, New, Maintenance, Needs Inspection) are
+    dynamically color-coded with subtle glowing status dots.
+  - Premium micro-interactions: cards scale upwards slightly and glow purple
+    on hover.
+
+C. Shell Modules / Placeholders (App.jsx)
+- The shell implements a 4-tab dashboard structure. Currently, the first tab is
+  fully implemented, while the rest render a placeholder:
+  - Tab 0: Catalog (Active)
+  - Tab 1: Book Equipment (Placeholder: "Module Loading...")
+  - Tab 2: Location Batch Allocator (Placeholder: "Module Loading...")
+  - Tab 3: Master Calendar (Placeholder: "Module Loading...")
+
+------------------------------------------------------------------------
+4. BACKEND INTEGRATION
+------------------------------------------------------------------------
+The frontend connects to a backend API running on `http://localhost:8080/api`.
+The current integration focuses on:
+- Endpoint: GET `/api/resources`
+- Query Params: `type` (optional, can be 'LOCATION' or 'EQUIPMENT')
+
+------------------------------------------------------------------------
+5. DEVELOPMENT GUIDELINES
+------------------------------------------------------------------------
+- Maintaining Aesthetics: Ensure new components follow the existing premium,
+  glassmorphic theme. Avoid using default, unstyled elements or introducing
+  discordant color schemes.
+- Light Dependencies: Use self-contained visual elements (such as the SVG paths
+  defined in `ResourceCatalog.jsx` for search/users/box icons) to keep bundle size low
+  and reduce third-party package reliance.
+
+========================================================================
+IMPORTANT: Please keep this file updated with details of new features,
+components, or structural refactoring as you build them!
+========================================================================
