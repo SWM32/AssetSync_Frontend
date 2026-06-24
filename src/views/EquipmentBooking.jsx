@@ -17,6 +17,7 @@ import {
   Stack
 } from '@mui/material';
 import { bookEquipment } from '../services/api';
+import AlternativeModal from '../components/AlternativeModal';
 
 /**
  * EquipmentBooking component.
@@ -35,6 +36,8 @@ export default function EquipmentBooking() {
   const [loading, setLoading] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [conflictError, setConflictError] = useState(null);
+  const [conflictData, setConflictData] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,9 +65,11 @@ export default function EquipmentBooking() {
     try {
       const result = await bookEquipment(payload);
 
-      if (typeof result === 'string') {
-        // Backend returned 409 Conflict string
-        setConflictError(result);
+      if (result && result.alternativeResources) {
+        // Backend returned 409 Conflict Response with suggestions
+        setConflictData(result);
+        setModalOpen(true);
+        setConflictError(result.message);
       } else if (result && result.status === 'ALLOCATED') {
         // Backend successfully allocated
         setSuccessOpen(true);
@@ -76,12 +81,59 @@ export default function EquipmentBooking() {
           startTime: '',
           endTime: ''
         });
+      } else if (typeof result === 'string') {
+        setConflictError(result);
       } else {
         setConflictError('An unexpected response format was returned from the server.');
       }
     } catch (err) {
       console.error('Error submitting booking request:', err);
-      const serverMessage = err.response?.data || err.message || 'An error occurred during booking. Please try again.';
+      const serverMessage = err.response?.data?.message || err.response?.data || err.message || 'An error occurred during booking. Please try again.';
+      setConflictError(serverMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectAlternative = async (alternativeId) => {
+    const updatedPayload = {
+      resourceId: Number(alternativeId),
+      requesterName: formData.requesterName,
+      userRole: formData.userRole,
+      requestedQuantity: Number(formData.requestedQuantity),
+      startTime: formData.startTime,
+      endTime: formData.endTime
+    };
+
+    setFormData((prev) => ({ ...prev, resourceId: alternativeId }));
+    setLoading(true);
+    setConflictError(null);
+
+    try {
+      const result = await bookEquipment(updatedPayload);
+
+      if (result && result.status === 'ALLOCATED') {
+        setSuccessOpen(true);
+        setFormData({
+          resourceId: '',
+          requesterName: '',
+          userRole: '',
+          requestedQuantity: '',
+          startTime: '',
+          endTime: ''
+        });
+      } else if (result && result.alternativeResources) {
+        setConflictData(result);
+        setModalOpen(true);
+        setConflictError(result.message);
+      } else if (typeof result === 'string') {
+        setConflictError(result);
+      } else {
+        setConflictError('An unexpected response format was returned from the server.');
+      }
+    } catch (err) {
+      console.error('Error booking alternative resource:', err);
+      const serverMessage = err.response?.data?.message || err.response?.data || err.message || 'An error occurred.';
       setConflictError(serverMessage);
     } finally {
       setLoading(false);
@@ -321,6 +373,13 @@ export default function EquipmentBooking() {
           Success: Equipment Allocated.
         </Alert>
       </Snackbar>
+
+      <AlternativeModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        conflictData={conflictData}
+        onSelectAlternative={handleSelectAlternative}
+      />
     </Container>
   );
 }

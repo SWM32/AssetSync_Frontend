@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8081/api';
 
 /**
  * Fetches resources from the Spring Boot backend.
@@ -43,4 +43,25 @@ export const bookEquipment = async (payload) => {
     throw error;
   }
 };
+
+/**
+ * Books a location by sending a request to the backend.
+ * Returns the error response data if a 409 Conflict occurs.
+ * 
+ * @param {Object} payload - The booking request payload
+ * @returns {Promise<Object>} The saved BookingRequest object or conflict error object
+ */
+export const bookLocation = async (payload) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/locations/book`, payload);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      return error.response.data;
+    }
+    console.error('Error in bookLocation API helper:', error.message || error);
+    throw error;
+  }
+};
+
 
