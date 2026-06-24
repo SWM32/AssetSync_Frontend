@@ -23,3 +23,24 @@ export const fetchResources = async (type = null) => {
     throw error;
   }
 };
+
+/**
+ * Books equipment by sending a request to the backend.
+ * Crucially returns the error response data if a 409 Conflict occurs.
+ * 
+ * @param {Object} payload - The booking request payload
+ * @returns {Promise<Object|string>} The saved BookingRequest object or conflict error message
+ */
+export const bookEquipment = async (payload) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/equipment/book`, payload);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      return error.response.data;
+    }
+    console.error('Error in bookEquipment API helper:', error.message || error);
+    throw error;
+  }
+};
+
