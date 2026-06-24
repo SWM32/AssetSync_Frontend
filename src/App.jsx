@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography } from '@mui/material';
 import Navbar from './components/Navbar';
 import ResourceCatalog from './views/ResourceCatalog';
+import EquipmentBooking from './views/EquipmentBooking';
 
 // Create a premium custom MUI dark theme
 const theme = createTheme({
@@ -61,37 +62,7 @@ function App() {
       case 0:
         return <ResourceCatalog />;
       case 1:
-        return (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              py: 16, 
-              textAlign: 'center',
-              borderRadius: '24px',
-              border: '1px dashed rgba(255,255,255,0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.01)',
-              mt: 4
-            }}
-          >
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontFamily: "'Outfit', sans-serif", 
-                fontWeight: 700, 
-                mb: 1, 
-                color: 'text.secondary' 
-              }}
-            >
-              Book Equipment
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', opacity: 0.6 }}>
-              Module Loading...
-            </Typography>
-          </Box>
-        );
+        return <EquipmentBooking />;
       case 2:
         return (
           <Box 

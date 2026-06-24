@@ -61,11 +61,18 @@ B. Asset Catalog (views/ResourceCatalog.jsx)
   - Premium micro-interactions: cards scale upwards slightly and glow purple
     on hover.
 
-C. Shell Modules / Placeholders (App.jsx)
-- The shell implements a 4-tab dashboard structure. Currently, the first tab is
-  fully implemented, while the rest render a placeholder:
+C. Equipment Booking (views/EquipmentBooking.jsx) (Active)
+- Real-time Equipment Booking: Form interface accessible on Tab 1 ("Book Equipment").
+- Form Fields: `resourceId` (number input), `requesterName` (text input), `userRole` (dropdown selector for LECTURER/STUDENT), `requestedQuantity` (number input), `startTime` (datetime-local), and `endTime` (datetime-local).
+- Feedback Handling:
+  - Submit Button: Prominent button with a gradient of purple-indigo and a loading spinner while API booking is in flight.
+  - Successful booking (200 OK) displays a green Snackbar Alert: "Success: Equipment Allocated." and clears the form.
+  - Insufficient inventory or resource not found (409 Conflict / 404 Not Found) displays a red Alert with the exact message from the backend.
+
+D. Shell Modules / Placeholders (App.jsx)
+- The shell implements a 4-tab dashboard structure. Tab 0 and Tab 1 are active, while the rest render a placeholder:
   - Tab 0: Catalog (Active)
-  - Tab 1: Book Equipment (Placeholder: "Module Loading...")
+  - Tab 1: Book Equipment (Active)
   - Tab 2: Location Batch Allocator (Placeholder: "Module Loading...")
   - Tab 3: Master Calendar (Placeholder: "Module Loading...")
 
