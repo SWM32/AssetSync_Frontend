@@ -15,6 +15,7 @@ import {
   Autocomplete
 } from '@mui/material';
 import { bookEquipment, fetchResources } from '../services/api';
+import AlternativeModal from '../components/AlternativeModal';
 
 /**
  * EquipmentBooking component.
@@ -42,6 +43,10 @@ export default function EquipmentBooking({ userRole }) {
   const [startTimeFocused, setStartTimeFocused] = useState(false);
   const [endTimeFocused, setEndTimeFocused] = useState(false);
 
+  // States for Feature 4: Alternative suggestion engine
+  const [conflictData, setConflictData] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   // Fetch equipment list on mount
   useEffect(() => {
     const loadEquipment = async () => {
@@ -64,6 +69,45 @@ export default function EquipmentBooking({ userRole }) {
     }));
   };
 
+  const handleSelectAlternative = async (alternativeResourceId) => {
+    const payload = {
+      resourceId: Number(alternativeResourceId),
+      requesterName: formData.requesterName,
+      userRole: userRole,
+      requestedQuantity: Number(formData.requestedQuantity),
+      startTime: formData.startTime,
+      endTime: formData.endTime
+    };
+
+    setLoading(true);
+    setConflictError(null);
+
+    try {
+      const result = await bookEquipment(payload);
+
+      if (result && result.status === 'ALLOCATED') {
+        setSuccessOpen(true);
+        const newSelected = equipmentOptions.find(opt => opt.id === alternativeResourceId);
+        setSelectedEquipment(newSelected || null);
+        setFormData((prev) => ({
+          ...prev,
+          resourceId: String(alternativeResourceId)
+        }));
+      } else if (result && typeof result === 'object' && result.alternativeResources !== undefined) {
+        setConflictData(result);
+        setModalOpen(true);
+      } else {
+        setConflictError(typeof result === 'string' ? result : 'Alternative booking failed.');
+      }
+    } catch (err) {
+      console.error('Error booking alternative:', err);
+      const serverMessage = err.response?.data?.message || err.response?.data || err.message || 'An error occurred during booking. Please try again.';
+      setConflictError(serverMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -82,9 +126,10 @@ export default function EquipmentBooking({ userRole }) {
     try {
       const result = await bookEquipment(payload);
 
-      if (typeof result === 'string') {
-        // Backend returned 409 Conflict string
-        setConflictError(result);
+      if (result && typeof result === 'object' && result.alternativeResources !== undefined) {
+        // Backend returned 409 Conflict with structured suggestions
+        setConflictData(result);
+        setModalOpen(true);
       } else if (result && result.status === 'ALLOCATED') {
         // Backend successfully allocated
         setSuccessOpen(true);
@@ -97,11 +142,11 @@ export default function EquipmentBooking({ userRole }) {
           endTime: ''
         });
       } else {
-        setConflictError('An unexpected response format was returned from the server.');
+        setConflictError(typeof result === 'string' ? result : 'An unexpected response format was returned from the server.');
       }
     } catch (err) {
       console.error('Error submitting booking request:', err);
-      const serverMessage = err.response?.data || err.message || 'An error occurred during booking. Please try again.';
+      const serverMessage = err.response?.data?.message || err.response?.data || err.message || 'An error occurred during booking. Please try again.';
       setConflictError(serverMessage);
     } finally {
       setLoading(false);
@@ -400,6 +445,13 @@ export default function EquipmentBooking({ userRole }) {
           Success: Equipment Allocated.
         </Alert>
       </Snackbar>
+
+      <AlternativeModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        conflictData={conflictData}
+        onSelectAlternative={handleSelectAlternative}
+      />
     </Container>
   );
 }
