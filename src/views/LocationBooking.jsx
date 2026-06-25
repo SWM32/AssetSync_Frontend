@@ -14,6 +14,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { submitLocationRequest } from '../services/api';
+import AlternativeModal from '../components/AlternativeModal';
 
 /**
  * LocationBooking component.
@@ -35,12 +36,28 @@ export default function LocationBooking({ userRole }) {
   const [startTimeFocused, setStartTimeFocused] = useState(false);
   const [endTimeFocused, setEndTimeFocused] = useState(false);
 
+  // States for Feature 4: Alternative suggestion engine
+  const [conflictData, setConflictData] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSelectAlternative = (alternativeResourceId) => {
+    // Alert the user that they have selected an alternative room suggestion
+    setSuccessOpen(true);
+    setFormData({
+      requestedCategory: '',
+      requesterName: '',
+      studentCount: '',
+      startTime: '',
+      endTime: ''
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -81,8 +98,13 @@ export default function LocationBooking({ userRole }) {
       });
     } catch (err) {
       console.error('Error submitting location request:', err);
-      const serverMessage = err.response?.data || err.message || 'An error occurred. Please try again.';
-      setErrorMsg(serverMessage);
+      if (err.response && err.response.status === 409) {
+        setConflictData(err.response.data);
+        setModalOpen(true);
+      } else {
+        const serverMessage = err.response?.data?.message || err.response?.data || err.message || 'An error occurred. Please try again.';
+        setErrorMsg(serverMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -291,6 +313,13 @@ export default function LocationBooking({ userRole }) {
           Request submitted to the T-24 processing queue.
         </Alert>
       </Snackbar>
+
+      <AlternativeModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        conflictData={conflictData}
+        onSelectAlternative={handleSelectAlternative}
+      />
     </Container>
   );
 }
