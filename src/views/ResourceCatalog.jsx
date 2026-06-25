@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Grid, 
@@ -62,7 +62,7 @@ export default function ResourceCatalog() {
         const apiParam = filterType === 'ALL' ? null : filterType;
         const data = await fetchResources(apiParam);
         setResources(data || []);
-      } catch (err) {
+      } catch {
         setError('Could not retrieve resources from server. Please verify database connection.');
       } finally {
         setLoading(false);

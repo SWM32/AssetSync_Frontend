@@ -72,14 +72,18 @@ C. Equipment Booking (views/EquipmentBooking.jsx) (Active)
   - Successful booking (200 OK) displays a green Snackbar Alert: "Success: Equipment Allocated." and clears the form.
   - Insufficient inventory or resource not found (409 Conflict / 404 Not Found) displays a red Alert with the exact message from the backend.
 
-D. Shell Modules / Placeholders (App.jsx)
-- The shell implements a 4-tab dashboard structure. Tab 0 and Tab 1 are active, while the rest render a placeholder:
+D. Location Batch Allocator (views/LocationBooking.jsx, views/BatchProcessor.jsx) (Active)
+- Venue Advance Request Form: Form allowing users to submit location requests. Fields include category ("Lecture Hal", "Computer Lab", "Auditorium"), requester name, user role (automatically mapped to priority: 1 for Lecturer, 2 for Student), estimated student capacity, and start/end times. Displays feedback Snackbar.
+- System Admin Batch Allocator Panel: Prominent, centralized control card to manually run the T-24 allocation algorithm for demo purposes. Includes disabled button states, spinner indicators during execution, and success Alert messages.
+
+E. Shell Modules / Placeholders (App.jsx)
+- The shell implements a 4-tab dashboard structure. Tab 0, Tab 1, and Tab 2 are active:
   - Tab 0: Catalog (Active)
   - Tab 1: Book Equipment (Active)
-  - Tab 2: Location Batch Allocator (Placeholder: "Module Loading...")
+  - Tab 2: Location Batch Allocator (Active - houses sub-navigation toggle to switch between Request Form and Admin Panel)
   - Tab 3: Master Calendar (Placeholder: "Module Loading...")
 
-E. Role-Selection Landing Page (views/Login.jsx) (Active)
+F. Role-Selection Landing Page (views/Login.jsx) (Active)
 - High-fidelity simulated login interface presented to unauthenticated users.
 - Prompts users to select their role: "Lecturer" or "Student" using premium hover-animated card buttons featuring styled SVG icons.
 - Selected role persists in `localStorage` to retain the session across reloads.
@@ -91,7 +95,14 @@ E. Role-Selection Landing Page (views/Login.jsx) (Active)
 The frontend connects to a backend API running on `http://localhost:8080/api`.
 The current integration focuses on:
 - Endpoint: GET `/api/resources`
-- Query Params: `type` (optional, can be 'LOCATION' or 'EQUIPMENT')
+  - Query Params: `type` (optional, can be 'LOCATION' or 'EQUIPMENT')
+- Endpoint: POST `/api/equipment/book`
+  - Payload: booking details for hardware checkout.
+- Endpoint: POST `/api/locations/request`
+  - Payload: location booking request details (mapped categories, priorities).
+- Endpoint: POST `/api/locations/process-batch`
+  - Triggers the 24-hour batch scheduling allocation algorithm.
+
 
 ------------------------------------------------------------------------
 5. DEVELOPMENT GUIDELINES

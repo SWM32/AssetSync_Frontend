@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -182,7 +182,8 @@ export default function EquipmentBooking({ userRole }) {
                   }));
                 }}
                 renderOption={(props, option) => {
-                  const { key, ...optionProps } = props;
+                  const optionProps = { ...props };
+                  delete optionProps.key;
                   return (
                     <Box 
                       key={option.id} 

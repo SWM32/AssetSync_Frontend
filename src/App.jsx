@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography } from '@mui/material';
+import { useState } from 'react';
+import { ThemeProvider, createTheme, CssBaseline, Container, Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import Navbar from './components/Navbar';
 import ResourceCatalog from './views/ResourceCatalog';
 import EquipmentBooking from './views/EquipmentBooking';
 import Login from './views/Login';
+import LocationBooking from './views/LocationBooking';
+import BatchProcessor from './views/BatchProcessor';
 
 // Create a premium custom MUI dark theme
 const theme = createTheme({
@@ -56,6 +58,7 @@ const theme = createTheme({
 
 function App() {
   const [activeTab, setActiveTab] = useState(0);
+  const [allocatorSubTab, setAllocatorSubTab] = useState('request');
   const [userRole, setUserRole] = useState(() => {
     return localStorage.getItem('demoUserRole') || null;
   });
@@ -79,34 +82,50 @@ function App() {
         return <EquipmentBooking userRole={userRole} />;
       case 2:
         return (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              py: 16, 
-              textAlign: 'center',
-              borderRadius: '24px',
-              border: '1px dashed rgba(255,255,255,0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.01)',
-              mt: 4
-            }}
-          >
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontFamily: "'Outfit', sans-serif", 
-                fontWeight: 700, 
-                mb: 1, 
-                color: 'text.secondary' 
-              }}
-            >
-              Location Batch Allocator
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', opacity: 0.6 }}>
-              Module Loading...
-            </Typography>
+          <Box sx={{ mt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+              <ToggleButtonGroup
+                value={allocatorSubTab}
+                exclusive
+                onChange={(e, value) => { if (value) setAllocatorSubTab(value); }}
+                aria-label="allocator mode"
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '16px',
+                  p: 0.5,
+                  '& .MuiToggleButtonGroup-grouped': {
+                    border: 0,
+                    borderRadius: '12px !important',
+                    mx: 0.5,
+                    px: { xs: 2, sm: 3 },
+                    py: 1,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontFamily: "'Inter', sans-serif",
+                    color: 'text.secondary',
+                    transition: 'all 0.2s',
+                    '&.Mui-selected': {
+                      background: 'linear-gradient(135deg, #c084fc 0%, #6366f1 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 12px rgba(168, 85, 247, 0.15)',
+                    },
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'primary.light',
+                      '&.Mui-selected': {
+                        background: 'linear-gradient(135deg, #c084fc 0%, #6366f1 100%)',
+                        color: '#ffffff',
+                      }
+                    }
+                  }
+                }}
+              >
+                <ToggleButton value="request">Venue Request Form</ToggleButton>
+                <ToggleButton value="admin">Batch Processor Admin</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+            {allocatorSubTab === 'request' ? <LocationBooking userRole={userRole} /> : <BatchProcessor />}
           </Box>
         );
       case 3:

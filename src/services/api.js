@@ -44,3 +44,35 @@ export const bookEquipment = async (payload) => {
   }
 };
 
+/**
+ * Submits a location advance request to the backend.
+ * 
+ * @param {Object} payload - The location request payload
+ * @returns {Promise<Object>} The saved LocationRequest object
+ */
+export const submitLocationRequest = async (payload) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/locations/request`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error in submitLocationRequest API helper:', error.message || error);
+    throw error;
+  }
+};
+
+/**
+ * Triggers the 24-hour batch scheduling allocation algorithm on the backend.
+ * 
+ * @returns {Promise<string>} Success message from the backend
+ */
+export const triggerBatchProcess = async () => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/locations/process-batch`);
+    return response.data;
+  } catch (error) {
+    console.error('Error in triggerBatchProcess API helper:', error.message || error);
+    throw error;
+  }
+};
+
+
