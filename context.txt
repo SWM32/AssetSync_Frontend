@@ -76,12 +76,12 @@ D. Location Batch Allocator (views/LocationBooking.jsx, views/BatchProcessor.jsx
 - Venue Advance Request Form: Form allowing users to submit location requests. Fields include category ("Lecture Hal", "Computer Lab", "Auditorium"), requester name, user role (automatically mapped to priority: 1 for Lecturer, 2 for Student), estimated student capacity, and start/end times. Displays feedback Snackbar.
 - System Admin Batch Allocator Panel: Prominent, centralized control card to manually run the T-24 allocation algorithm for demo purposes. Includes disabled button states, spinner indicators during execution, and success Alert messages.
 
-E. Shell Modules / Placeholders (App.jsx)
-- The shell implements a 4-tab dashboard structure. Tab 0, Tab 1, and Tab 2 are active:
+E. Master Calendar View (views/MasterCalendar.jsx) (Active)
+- The shell implements a 4-tab dashboard structure. All tabs are now active:
   - Tab 0: Catalog (Active)
   - Tab 1: Book Equipment (Active)
   - Tab 2: Location Batch Allocator (Active - houses sub-navigation toggle to switch between Request Form and Admin Panel)
-  - Tab 3: Master Calendar (Placeholder: "Module Loading...")
+  - Tab 3: Master Calendar (Active - aggregates location allocations and equipment bookings into a unified schedule view)
 
 F. Role-Selection Landing Page (views/Login.jsx) (Active)
 - High-fidelity simulated login interface presented to unauthenticated users.
@@ -102,6 +102,8 @@ The current integration focuses on:
   - Payload: location booking request details (mapped categories, priorities).
 - Endpoint: POST `/api/locations/process-batch`
   - Triggers the 24-hour batch scheduling allocation algorithm.
+- Endpoint: GET `/api/calendar/events`
+  - Returns: Sorted combined array of location allocations and equipment bookings.
 
 
 ------------------------------------------------------------------------
