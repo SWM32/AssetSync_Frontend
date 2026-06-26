@@ -6,6 +6,7 @@ import EquipmentBooking from './views/EquipmentBooking';
 import Login from './views/Login';
 import LocationBooking from './views/LocationBooking';
 import BatchProcessor from './views/BatchProcessor';
+import MasterCalendar from './views/MasterCalendar';
 
 // Create a premium custom MUI dark theme
 const theme = createTheme({
@@ -129,37 +130,7 @@ function App() {
           </Box>
         );
       case 3:
-        return (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              py: 16, 
-              textAlign: 'center',
-              borderRadius: '24px',
-              border: '1px dashed rgba(255,255,255,0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.01)',
-              mt: 4
-            }}
-          >
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontFamily: "'Outfit', sans-serif", 
-                fontWeight: 700, 
-                mb: 1, 
-                color: 'text.secondary' 
-              }}
-            >
-              Master Calendar
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', opacity: 0.6 }}>
-              Module Loading...
-            </Typography>
-          </Box>
-        );
+        return <MasterCalendar />;
       default:
         return <ResourceCatalog />;
     }
@@ -180,17 +151,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navbar 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab} 
-          userRole={userRole} 
-          onLogout={handleLogout} 
+        <Navbar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          userRole={userRole}
+          onLogout={handleLogout}
         />
-        <Container 
-          maxWidth="lg" 
+        <Container
+          maxWidth="lg"
           component="main"
-          sx={{ 
-            flexGrow: 1, 
+          sx={{
+            flexGrow: 1,
             px: { xs: 2, sm: 3 },
             pb: 6
           }}

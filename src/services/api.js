@@ -15,7 +15,7 @@ export const fetchResources = async (type = null) => {
     if (type && type !== 'ALL') {
       params.type = type;
     }
-    
+
     const response = await axios.get(`${API_BASE_URL}/resources`, { params });
     return response.data;
   } catch (error) {
@@ -76,3 +76,17 @@ export const triggerBatchProcess = async () => {
 };
 
 
+/**
+ * Fetches unified calendar events from the backend.
+ * 
+ * @returns {Promise<Array>} Promise resolving to the list of calendar events
+ */
+export const fetchCalendarEvents = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/calendar/events`);
+    return response.data;
+  } catch (error) {
+    console.error('Error in fetchCalendarEvents API helper:', error.message || error);
+    throw error;
+  }
+};
